@@ -17,13 +17,14 @@ ROOTFS=""
 ROOT="/dev/vda3"
 TIMEOUT=""
 QEMUARGS=""
+EXTRA_ARGS=""
 
 # TODO Add networking
 
 usage()
 {
 	prog=$(basename $0)
-	echo "$prog [-a arch] [-d] [-r rootfs] [-R root] -k <kernel> -i <initrd> [-q qemuargs]" >&2
+	echo "$prog [-a arch] [-d] [-r rootfs] [-R root] -k <kernel> -i <initrd> [-q qemuargs] [-A appendargs]" >&2
 	echo "  -a arch         Architecture for QEMU." >&2
 	echo "  -d              Enable debug output." >&2
 	echo "  -r rootfs       Rootfs image to use." >&2
@@ -31,12 +32,16 @@ usage()
 	echo "  -k kernel       kernel image to use." >&2
 	echo "  -i initrd       initrd image to use." >&2
 	echo "  -q qemuargs	Extra qemu arguments." >&2
+	echo "  -A appendargs	Extra -append arguments." >&2
 }
 
-while getopts "da:k:i:r:hR:t:q:" opt; do
+while getopts "da:A:k:i:r:hR:t:q:" opt; do
 	case ${opt} in
 		a)
 			ARCH=$OPTARG
+			;;
+		A)
+			EXTRA_ARGS=$OPTARG
 			;;
 		d)
 			DEBUG="-d"
@@ -121,7 +126,7 @@ QEMU_CMD=(
 	-smp 2 -m 1024
 
 	# Kernel & initrd
-	-append 'root='${ROOT}' ro console='${CONSOLE}' '${QUIET}' rdinit=/bin/init crashkernel=64M'
+	-append 'root='${ROOT}' ro console='${CONSOLE}' '${QUIET}' rdinit=/bin/init crashkernel=64M '"${EXTRA_ARGS}"
 	-kernel "$KERNEL"
 	-initrd "$INITRD"
 )
